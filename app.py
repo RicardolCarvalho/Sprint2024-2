@@ -16,6 +16,15 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
 mongo = PyMongo(app, tlsAllowInvalidCertificates=True, tls=True)
 
+@app.route('/test-connection', methods=['GET'])
+def test_connection():
+    try:
+        # Testar a conexão com o MongoDB
+        mongo.cx.server_info()  # Tenta acessar informações do servidor
+        return jsonify({"status": "success", "message": "Conexão com o MongoDB bem-sucedida!"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/turmas', methods=['POST'])
 def post_json():
     '''
