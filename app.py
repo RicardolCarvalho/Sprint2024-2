@@ -66,81 +66,6 @@ def perguntas_retencao(id):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# def processar_portfolio_em_background(data):
-#     """
-#     Processa os dados do portfólio e atualiza o MongoDB em segundo plano.
-#     """
-#     try:
-#         dados_aluno = {}
-
-#         for materia, alunos in data["materias"].items():
-#             for aluno in alunos:
-#                 nome = aluno.get("Nome")
-#                 if not nome:
-#                     continue
-
-#                 frequencias = {key.replace(".", "_"): value for key, value in aluno.items() if key.startswith("%")}
-#                 if all(freq == -1 for freq in frequencias.values()):
-#                     continue
-
-#                 notas = {key.replace(".", "_"): value for key, value in aluno.items() if key.startswith(("1º", "2º", "3º", "4º"))}
-#                 ca = {key.replace(".", "_"): value for key, value in aluno.items() if key.startswith("CA")}
-#                 falta = {key.replace(".", "_"): value for key, value in aluno.items() if key.startswith("F")}
-#                 sf = {key.replace(".", "_"): value for key, value in aluno.items() if key.startswith("SF")}
-
-#                 atualizacao = {
-#                     "materia": materia,
-#                     "anoTurma": data["anoTurma"],
-#                     "notas": {**frequencias, **notas, **ca, **falta, **sf}
-#                 }
-
-#                 if nome not in dados_aluno:
-#                     dados_aluno[nome] = []
-#                 dados_aluno[nome].append(atualizacao)
-
-#         for nome, materias in dados_aluno.items():
-#             mongo.db.portfolio.update_one(
-#                 {"nome": nome},
-#                 {
-#                     "$set": {"dadosAluno": {nome: materias}},
-#                     "$setOnInsert": {
-#                         "laudos": [],
-#                         "observacoes": [],
-#                         "perguntas": {
-#                             "participacao_atividades_compensacao_ausencia": "Não",
-#                             "busca_ativa_frequencia_regular": "Não",
-#                             "responsaveis_informados_sobre_frequencia": "Não",
-#                             "conselho_tutelar_notificado_excesso_ausencias": "Não",
-#                             "acoes_recuperacao_continua": "Não",
-#                             "matricula_em_projetos_recuperacao_paralela": "Não",
-#                             "atualizacao_bimestral_mapeamento_estudantes": "Não",
-#                             "instrumentos_diversificados_avaliacao": "Não",
-#                             "comunicacao_familia_sobre_desempenho": "Não",
-#                             "comunicacao_com_dre_naapa": "Não",
-#                             "plano_aee_registrado_sgp": "Não"
-#                         }
-#                     }
-#                 },
-#                 upsert=True
-#             )
-#     except Exception as e:
-#         print(f"Erro no processamento em segundo plano: {e}")
-
-# @app.route('/atualizar-portfolio', methods=['POST'])
-# def atualizar_portfolio():
-#     try:
-#         data = request.get_json()
-#         if not data or "materias" not in data or "anoTurma" not in data:
-#             return jsonify({"status": "error", "message": "JSON inválido ou incompleto"}), 400
-
-#         # Processa em segundo plano
-#         thread = Thread(target=processar_portfolio_em_background, args=(data,))
-#         thread.start()
-
-#         return jsonify({"status": "success", "message": "Processamento iniciado em segundo plano"}), 202
-#     except Exception as e:
-#         return jsonify({"status": "error", "message": str(e)}), 500
-
 @app.route('/atualizar-portfolio', methods=['POST'])
 def atualizar_portfolio():
     '''
@@ -206,32 +131,34 @@ def atualizar_portfolio():
                 if nome not in dados_aluno:
                     dados_aluno[nome] = []
                 dados_aluno[nome].append(atualizacao)
-        # print(dados_aluno)
+
         # Atualizar o portfólio no banco
         for nome, materias in dados_aluno.items():
-            print(nome)
-            mongo.db.portfolio.update_one(
-                {"nome": nome},
-                {
-                    "$set": {"dadosAluno": {nome: materias}},
-                    "$setOnInsert": {
-                        "laudos": [],
-                        "observacoes": [],
-                        "perguntas": {"participacao_atividades_compensacao_ausencia": "Não", 
-                                    "busca_ativa_frequencia_regular": "Não", 
-                                    "responsaveis_informados_sobre_frequencia": "Não", 
-                                    "conselho_tutelar_notificado_excesso_ausencias": "Não", 
-                                    "acoes_recuperacao_continua": "Não", 
-                                    "matricula_em_projetos_recuperacao_paralela": "Não", 
-                                    "atualizacao_bimestral_mapeamento_estudantes": "Não", 
-                                    "instrumentos_diversificados_avaliacao": "Não", 
-                                    "comunicacao_familia_sobre_desempenho": "Não", 
-                                    "comunicacao_com_dre_naapa": "Não", 
-                                    "plano_aee_registrado_sgp": "Não"}
-                    }
-                },
-                upsert=True
-            )
+            try:
+                mongo.db.portfolio.update_one(
+                    {"nome": nome},
+                    {
+                        "$set": {"dadosAluno": {nome: materias}},
+                        "$setOnInsert": {
+                            "laudos": [],
+                            "observacoes": [],
+                            "perguntas": {"participacao_atividades_compensacao_ausencia": "Não", 
+                                        "busca_ativa_frequencia_regular": "Não", 
+                                        "responsaveis_informados_sobre_frequencia": "Não", 
+                                        "conselho_tutelar_notificado_excesso_ausencias": "Não", 
+                                        "acoes_recuperacao_continua": "Não", 
+                                        "matricula_em_projetos_recuperacao_paralela": "Não", 
+                                        "atualizacao_bimestral_mapeamento_estudantes": "Não", 
+                                        "instrumentos_diversificados_avaliacao": "Não", 
+                                        "comunicacao_familia_sobre_desempenho": "Não", 
+                                        "comunicacao_com_dre_naapa": "Não", 
+                                        "plano_aee_registrado_sgp": "Não"}
+                        }
+                    },
+                    upsert=True
+                )
+            except Exception as e:
+                return jsonify({"status": "error", "message": str(e)}), 500
 
         return jsonify({"status": "success", "message": "Portfólio atualizado com sucesso"}), 200
 
