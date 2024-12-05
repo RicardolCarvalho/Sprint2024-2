@@ -206,9 +206,10 @@ def atualizar_portfolio():
                 if nome not in dados_aluno:
                     dados_aluno[nome] = []
                 dados_aluno[nome].append(atualizacao)
-        print(dados_aluno)
+        # print(dados_aluno)
         # Atualizar o portfólio no banco
         for nome, materias in dados_aluno.items():
+            print(nome)
             mongo.db.portfolio.update_one(
                 {"nome": nome},
                 {
