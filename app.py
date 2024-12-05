@@ -7,10 +7,8 @@ import os
 from flask_cors import CORS
 from alunos import *
 from bson import ObjectId
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['MONGO_URI'] = os.getenv("MONGO_URI")
